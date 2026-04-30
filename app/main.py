@@ -1,29 +1,19 @@
-print("Hello, World!")
+from fastapi import FastAPI
+from app.db.db import create_tables
+from app.api.routers import categories, books
 
-from app.db.db import SessionLocal
-from app.db import crud
+app = FastAPI(title="Book Catalog API", description="Управление книгами и категориями")
 
-def main():
-    db = SessionLocal()
-    try:
-        categories = crud.get_categories(db)
-        if not categories:
-            print("В базе нет категорий. Сначала запустите app/init_db.py")
-            return
+# Создаём таблицы при старте (если их ещё нет)
+@app.on_event("startup")
+def on_startup():
+    create_tables()
 
-        for cat in categories:
-            print(f"\n📚 Категория: {cat.title}")
-            books = crud.get_books(db, category_id=cat.id)
-            if not books:
-                print("   (нет книг)")
-                continue
-            for book in books:
-                print(f"   • {book.title}")
-                print(f"     Описание: {book.description}")
-                print(f"     Цена: {book.price} руб.")
-                print(f"     Ссылка: {book.url or '(пусто)'}")
-    finally:
-        db.close()
+# Подключаем роутеры
+app.include_router(categories.router)
+app.include_router(books.router)
 
-if __name__ == "__main__":
-    main()
+# Корневой эндпоинт (для проверки)
+@app.get("/")
+def read_root():
+    return {"message": "Book Catalog API is running"}
