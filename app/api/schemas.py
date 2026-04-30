@@ -12,10 +12,9 @@ class CategoryUpdate(BaseModel):
     title: Optional[str] = None
 
 class CategoryInDB(CategoryBase):
-    id: int
+    model_config = {"from_attributes": True}
 
-    class Config:
-        orm_mode = True  # для Pydantic v1; в v2 используйте model_config
+    id: int
 
 # ---------- Book ----------
 class BookBase(BaseModel):
@@ -36,8 +35,7 @@ class BookUpdate(BaseModel):
     category_id: Optional[int] = None
 
 class BookInDB(BookBase):
-    id: int
-    category: Optional[CategoryInDB] = None  # для загрузки связанного объекта
+    model_config = {"from_attributes": True}
 
-    class Config:
-        orm_mode = True
+    id: int
+    category: Optional[CategoryInDB] = None
